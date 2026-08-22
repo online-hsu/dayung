@@ -210,6 +210,25 @@
       .sidebar-item .ic { font-size: 19px; }
       .sidebar-item.active { background: rgba(224,167,46,0.16); color: var(--gold); border-top: 3px solid var(--gold); }
       .main-content { margin-left: 0; padding-bottom: 86px; }
+
+      /* Live streaming di Beranda dipindah ke halaman menu "Live Streaming"
+         tersendiri khusus tampilan smartphone - jadi kotaknya disembunyikan
+         total di Beranda pada lebar layar ini (desktop tidak terpengaruh). */
+      .beranda-stream-panel { display: none !important; }
+    }
+
+    /* ===== HALAMAN LIVE STREAMING (menu smartphone, landscape) ===== */
+    .livestream-page-panel { margin-top: 18px; }
+    @media (max-width: 880px) {
+      /* Video ditampilkan lebar penuh (landscape 16:9) melewati batas
+         max-width .container, supaya tampil lebih besar & proporsional
+         di layar HP dibanding versi kecil yang dulu ada di Beranda. */
+      .livestream-page-panel {
+        margin-left: -24px; margin-right: -24px; width: calc(100% + 48px);
+      }
+      .livestream-page-panel .stream-panel-inner { border-radius: 0; padding: 0; background: transparent; box-shadow: none; }
+      .livestream-page-panel .stream-video-wrap { border-radius: 0; }
+      .livestream-page-panel .stream-live-badge { margin: 12px 0 10px 24px; }
     }
 
     .container { max-width: 960px; margin: 0 auto; padding: 28px 24px 20px 24px; }
