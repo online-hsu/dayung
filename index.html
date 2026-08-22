@@ -28,6 +28,7 @@
       <div class="sidebar-brand">🚣 HUT RI KE-81<br><small>PENDAFTARAN LOMBA DAYUNG</small></div>
       <div class="sidebar-nav">
         <div class="sidebar-item active" id="navBeranda" onclick="tampilkanBeranda()"><span class="ic">🏠</span><span>Beranda</span></div>
+        <div class="sidebar-item" id="navLiveStream" onclick="tampilkanLiveStream()"><span class="ic">🔴</span><span>Live Streaming</span></div>
         <div class="sidebar-item" id="navJadwal" onclick="tampilkanJadwalGlobal()"><span class="ic">🗓️</span><span>Jadwal Pertandingan</span></div>
         <div class="sidebar-item" id="navSkema" onclick="tampilkanSkemaPilihKategori()"><span class="ic">🏆</span><span>Skema</span></div>
         <div class="sidebar-item" id="navAdmin" onclick="bukaAdminLogin()"><span class="ic">🔐</span><span>Admin</span></div>
@@ -174,6 +175,24 @@
             <div class="section-title">⏭️ Race Berikutnya</div>
             <div id="berandaRaceBerikutnya" class="tim-list reveal-on-scroll"><div class="loading-state">Memuat race berikutnya...</div></div>
           </div>
+        </div>
+      </div>
+
+      <!-- ================= HALAMAN LIVE STREAMING (khusus menu smartphone) ================= -->
+      <div id="viewLiveStream" class="daftar-page" style="display:none;">
+        <div class="container">
+          <span class="back-link" onclick="tampilkanBeranda()">← Kembali ke Beranda</span>
+          <h2>🔴 Live Streaming</h2>
+          <div class="livestream-page-panel" id="liveStreamPagePanel" style="display:none;">
+            <div class="stream-panel-inner">
+              <div class="stream-live-badge">🔴 LIVE STREAMING</div>
+              <div class="stream-video-wrap">
+                <iframe id="liveStreamPageIframe" src="" title="Live Streaming" frameborder="0" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" loading="lazy"></iframe>
+                <div class="stream-caption-mask" aria-hidden="true"></div>
+              </div>
+            </div>
+          </div>
+          <div id="liveStreamPageKosong" class="empty-state">📡 Live streaming belum tersedia saat ini. Silakan cek kembali nanti.</div>
         </div>
       </div>
 
