@@ -217,18 +217,62 @@
       .beranda-stream-panel { display: none !important; }
     }
 
-    /* ===== HALAMAN LIVE STREAMING (menu smartphone, landscape) ===== */
+    /* ===== HALAMAN LIVE STREAMING (menu smartphone) - mode fullscreen landscape =====
+       Video ditampilkan MEMENUHI SELURUH LAYAR dan diputar (rotate) supaya
+       terlihat landscape/mendatar walau HP masih dipegang tegak (portrait) -
+       persis seperti mode "cinema/fullscreen" pemutar video pada umumnya. */
     .livestream-page-panel { margin-top: 18px; }
+    .livestream-fullscreen-close { display: none; }
+
     @media (max-width: 880px) {
-      /* Video ditampilkan lebar penuh (landscape 16:9) melewati batas
-         max-width .container, supaya tampil lebih besar & proporsional
-         di layar HP dibanding versi kecil yang dulu ada di Beranda. */
-      .livestream-page-panel {
-        margin-left: -24px; margin-right: -24px; width: calc(100% + 48px);
+      .livestream-fullscreen-close {
+        display: flex; align-items: center; justify-content: center;
+        position: fixed; top: 16px; right: 16px; z-index: 1001;
+        width: 38px; height: 38px; border-radius: 50%; border: none;
+        background: rgba(0,0,0,0.55); color: #fff; font-size: 18px; line-height: 1;
+        cursor: pointer;
       }
-      .livestream-page-panel .stream-panel-inner { border-radius: 0; padding: 0; background: transparent; box-shadow: none; }
-      .livestream-page-panel .stream-video-wrap { border-radius: 0; }
-      .livestream-page-panel .stream-live-badge { margin: 12px 0 10px 24px; }
+
+      /* HP posisi TEGAK (portrait) - video diputar 90 derajat mengisi
+         penuh layar, sehingga terlihat landscape meski HP tidak diputar. */
+      @media (orientation: portrait) {
+        .livestream-page-panel {
+          position: fixed; inset: 0; margin: 0; z-index: 1000;
+          width: 100vw; height: 100vh; background: #000;
+          display: flex; align-items: center; justify-content: center;
+          overflow: hidden;
+        }
+        .livestream-page-panel .stream-panel-inner {
+          position: absolute; top: 50%; left: 50%;
+          width: 100vh; height: 100vw;
+          transform: translate(-50%, -50%) rotate(90deg);
+          margin: 0; padding: 0; background: #000; border-radius: 0; box-shadow: none;
+          display: flex; align-items: center; justify-content: center;
+        }
+        .livestream-page-panel .stream-video-wrap {
+          position: absolute; inset: 0; width: 100%; height: 100%; padding-top: 0; border-radius: 0;
+        }
+        .livestream-page-panel .stream-live-badge { position: absolute; top: 10px; left: 10px; z-index: 3; margin: 0; }
+      }
+
+      /* HP sudah diputar ke posisi MENDATAR (landscape) - tampil fullscreen
+         biasa tanpa perlu rotate lagi, karena layar memang sudah landscape. */
+      @media (orientation: landscape) {
+        .livestream-page-panel {
+          position: fixed; inset: 0; margin: 0; z-index: 1000;
+          width: 100vw; height: 100vh; background: #000;
+          display: flex; align-items: center; justify-content: center;
+          overflow: hidden;
+        }
+        .livestream-page-panel .stream-panel-inner {
+          width: 100%; height: 100%; padding: 0; background: #000; border-radius: 0; box-shadow: none;
+          display: flex; align-items: center; justify-content: center;
+        }
+        .livestream-page-panel .stream-video-wrap {
+          position: absolute; inset: 0; width: 100%; height: 100%; padding-top: 0; border-radius: 0;
+        }
+        .livestream-page-panel .stream-live-badge { position: absolute; top: 10px; left: 10px; z-index: 3; margin: 0; }
+      }
     }
 
     .container { max-width: 960px; margin: 0 auto; padding: 28px 24px 20px 24px; }
