@@ -10,31 +10,38 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
     height: 100%;
+    overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
   }
-  body {
+
+  /* Layar loading, tampil di atas iframe sampai konten selesai load */
+  #loading {
+    position: fixed;
+    inset: 0;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
     background: linear-gradient(135deg, #2563eb, #1e40af);
     color: #fff;
     text-align: center;
     padding: 24px;
+    z-index: 10;
+    transition: opacity 0.3s ease;
   }
-  .box { max-width: 360px; }
+  #loading.hide { opacity: 0; pointer-events: none; }
   .spinner {
     width: 44px;
     height: 44px;
-    margin: 0 auto 20px;
+    margin-bottom: 20px;
     border: 4px solid rgba(255,255,255,0.3);
     border-top-color: #fff;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-  h1 { font-size: 1.2rem; font-weight: 600; margin-bottom: 8px; }
-  p { font-size: 0.9rem; opacity: 0.9; margin-bottom: 20px; }
+  #loading h1 { font-size: 1.1rem; font-weight: 600; margin-bottom: 6px; }
+  #loading p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 18px; max-width: 320px; }
   a.btn {
     display: inline-block;
     background: #fff;
@@ -45,34 +52,48 @@
     border-radius: 999px;
     font-size: 0.9rem;
   }
-  .fallback { display: none; margin-top: 18px; }
+  .fallback { display: none; }
+
+  /* Iframe yang membungkus konten Apps Script */
+  #appFrame {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
 </style>
 </head>
 <body>
-  <div class="box">
+  <div id="loading">
     <div class="spinner"></div>
-    <h1>Membuka Aplikasi Lomba Dayung HSU…</h1>
-    <p>Mohon tunggu sebentar, Anda akan diarahkan otomatis.</p>
+    <h1>Memuat Lomba Dayung HSU…</h1>
+    <p>Mohon tunggu sebentar.</p>
     <div class="fallback" id="fallback">
-      <a class="btn" id="manualLink" href="#">Buka Manual</a>
+      <a class="btn" id="manualLink" href="#" target="_blank" rel="noopener">Buka di Tab Baru</a>
     </div>
   </div>
+
+  <iframe id="appFrame" title="Lomba Dayung HSU" src=""></iframe>
 
 <script>
   // Ganti URL di bawah jika deployment Apps Script berubah
   var APPSCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlwKiEili9xmlc-DgaGhTmP7qu0Q0utnd3r4wCeV5I6aAttLUc-8bILQd1IuTO2CSdBQ/exec";
 
+  var frame = document.getElementById("appFrame");
+  var loading = document.getElementById("loading");
   document.getElementById("manualLink").href = APPSCRIPT_URL;
 
-  // Redirect otomatis ke Apps Script
-  setTimeout(function () {
-    window.location.replace(APPSCRIPT_URL);
-  }, 600);
+  frame.addEventListener("load", function () {
+    loading.classList.add("hide");
+  });
 
-  // Jika karena suatu hal redirect gagal (browser memblokir dsb), tampilkan tombol manual
+  frame.src = APPSCRIPT_URL;
+
+  // Jika terlalu lama (misal iframe diblokir), tampilkan opsi buka manual
   setTimeout(function () {
     document.getElementById("fallback").style.display = "block";
-  }, 3000);
+  }, 5000);
 </script>
 </body>
 </html>
