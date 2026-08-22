@@ -17,7 +17,7 @@
     .app-layout { display: flex; min-height: 100vh; min-height: 100dvh; }
     .sidebar {
       width: var(--sidebar-w); flex-shrink: 0; background: linear-gradient(165deg, var(--navy-900), var(--navy-700));
-      position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; z-index: 100;
+      position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; z-index: 500;
       display: flex; flex-direction: column; padding: 22px 0;
     }
     .sidebar-brand {
