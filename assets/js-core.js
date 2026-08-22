@@ -73,7 +73,7 @@
       if (el) el.classList.add('active');
     }
     function sembunyikanSemuaView() {
-      ['viewBeranda','viewKategoriDetail','viewDaftar','viewJadwalGlobal','viewSkemaPilihKategori','viewAdmin','viewAdminJadwal','viewAdminUndian','viewAdminStream','viewForm'].forEach(function(id) {
+      ['viewBeranda','viewLiveStream','viewKategoriDetail','viewDaftar','viewJadwalGlobal','viewSkemaPilihKategori','viewAdmin','viewAdminJadwal','viewAdminUndian','viewAdminStream','viewForm'].forEach(function(id) {
         document.getElementById(id).style.display = 'none';
       });
     }
@@ -88,6 +88,42 @@
       setTimeout(function() { if (typeof amatiElemenRevealScroll === 'function') amatiElemenRevealScroll(); }, 50);
       setTimeout(sinkronkanTinggiLivePanel, 60);
     }
+
+    /* ================= HALAMAN LIVE STREAMING (menu khusus smartphone) ================= */
+    function tampilkanLiveStream() {
+      sembunyikanSemuaView();
+      document.getElementById('viewLiveStream').style.display = 'block';
+      setActiveNav('navLiveStream');
+      window.scrollTo(0, 0);
+      muatLiveStreamPage();
+    }
+    function muatLiveStreamPage() {
+      google.script.run
+        .withSuccessHandler(function(cfg) {
+          const panel = document.getElementById('liveStreamPagePanel');
+          const kosong = document.getElementById('liveStreamPageKosong');
+          const iframe = document.getElementById('liveStreamPageIframe');
+          if (!panel || !kosong || !iframe) return;
+          const aktif = !!(cfg && cfg.tayang && cfg.link);
+          if (aktif) {
+            iframe.src = buatUrlEmbedStreaming(cfg.link, { play: cfg.play !== false, mute: cfg.mute !== false });
+            panel.style.display = 'block';
+            kosong.style.display = 'none';
+          } else {
+            iframe.src = '';
+            panel.style.display = 'none';
+            kosong.style.display = 'block';
+          }
+        })
+        .withFailureHandler(function() {
+          const panel = document.getElementById('liveStreamPagePanel');
+          const kosong = document.getElementById('liveStreamPageKosong');
+          if (panel) panel.style.display = 'none';
+          if (kosong) { kosong.style.display = 'block'; kosong.textContent = '❌ Gagal memuat live streaming.'; }
+        })
+        .getLiveStreamSetting();
+    }
+
 
     // Samakan tinggi panel "Sedang Berlangsung / Race Berikutnya" (kiri) &
     // kotak Live Streaming (kanan, kalau sedang tayang) persis dengan tinggi
@@ -204,6 +240,10 @@
       return link;
     }
     function muatBerandaStream() {
+      // Di layar smartphone, kotak live streaming Beranda disembunyikan
+      // (dipindah ke menu "Live Streaming" tersendiri - lihat tampilkanLiveStream()),
+      // jadi tidak perlu memuat iframe di sini sama sekali (hemat kuota pengunjung).
+      if (window.innerWidth <= 880) return;
       google.script.run
         .withSuccessHandler(function(cfg) {
           const panel = document.getElementById('berandaStreamPanel');
