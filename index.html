@@ -1,99 +1,560 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Lomba Dayung HSU</title>
-<meta name="theme-color" content="#2563eb">
-<link rel="icon" href="data:,">
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body {
-    height: 100%;
-    overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-  }
-
-  /* Layar loading, tampil di atas iframe sampai konten selesai load */
-  #loading {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #2563eb, #1e40af);
-    color: #fff;
-    text-align: center;
-    padding: 24px;
-    z-index: 10;
-    transition: opacity 0.3s ease;
-  }
-  #loading.hide { opacity: 0; pointer-events: none; }
-  .spinner {
-    width: 44px;
-    height: 44px;
-    margin-bottom: 20px;
-    border: 4px solid rgba(255,255,255,0.3);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  #loading h1 { font-size: 1.1rem; font-weight: 600; margin-bottom: 6px; }
-  #loading p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 18px; max-width: 320px; }
-  a.btn {
-    display: inline-block;
-    background: #fff;
-    color: #1e40af;
-    text-decoration: none;
-    font-weight: 600;
-    padding: 10px 22px;
-    border-radius: 999px;
-    font-size: 0.9rem;
-  }
-  .fallback { display: none; }
-
-  /* Iframe yang membungkus konten Apps Script */
-  #appFrame {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>HUT RI ke-81 Kab. Hulu Sungai Utara - Pendaftaran Lomba Dayung</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-  <div id="loading">
-    <div class="spinner"></div>
-    <h1>Memuat Lomba Dayung HSU…</h1>
-    <p>Mohon tunggu sebentar.</p>
-    <div class="fallback" id="fallback">
-      <a class="btn" id="manualLink" href="#" target="_blank" rel="noopener">Buka di Tab Baru</a>
+
+  <!-- ================= NAVBAR LANDING PAGE (khusus desktop) ================= -->
+  <nav class="landing-navbar" id="landingNavbar">
+    <div class="landing-navbar-inner">
+      <div class="landing-navbar-brand" onclick="tampilkanBeranda()">🚣 <span>HUT RI KE-81</span></div>
+      <div class="landing-navbar-links">
+        <a href="javascript:void(0)" onclick="tampilkanBeranda()">Beranda</a>
+        <a href="javascript:void(0)" onclick="tampilkanJadwalGlobal()">Jadwal Pertandingan</a>
+        <a href="javascript:void(0)" onclick="tampilkanSkemaPilihKategori()">Skema</a>
+        <button class="landing-navbar-cta" onclick="bukaAdminLogin()">🔐 Login Admin</button>
+      </div>
     </div>
+  </nav>
+
+  <div class="app-layout">
+    <nav class="sidebar" id="sidebarNav">
+      <div class="sidebar-brand">🚣 HUT RI KE-81<br><small>PENDAFTARAN LOMBA DAYUNG</small></div>
+      <div class="sidebar-nav">
+        <div class="sidebar-item active" id="navBeranda" onclick="tampilkanBeranda()"><span class="ic">🏠</span><span>Beranda</span></div>
+        <div class="sidebar-item" id="navJadwal" onclick="tampilkanJadwalGlobal()"><span class="ic">🗓️</span><span>Jadwal Pertandingan</span></div>
+        <div class="sidebar-item" id="navSkema" onclick="tampilkanSkemaPilihKategori()"><span class="ic">🏆</span><span>Skema</span></div>
+        <div class="sidebar-item" id="navAdmin" onclick="bukaAdminLogin()"><span class="ic">🔐</span><span>Admin</span></div>
+      </div>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-foot">Kab. Hulu Sungai Utara</div>
+    </nav>
+
+    <main class="main-content">
+
+      <!-- ================= MODAL LOGIN ADMIN ================= -->
+      <div id="adminLoginModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+          <h3>🔐 Login Admin</h3>
+          <p class="modal-sub">Khusus panitia — untuk melengkapi &amp; mengelola data pendaftaran.</p>
+          <label for="adminPasswordInput">Password Admin</label>
+          <input type="password" id="adminPasswordInput" placeholder="Masukkan password">
+          <div id="adminLoginMsg" class="msg" style="display:none;"></div>
+          <div class="modal-actions">
+            <button class="btn-secondary" onclick="tutupAdminLogin()">Batal</button>
+            <button class="btn-primary" onclick="prosesAdminLogin()">Masuk</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= MODAL KELOLA TIM (ADMIN) ================= -->
+      <div id="adminEditModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box modal-box-lg">
+          <div class="modal-head">
+            <h3 id="adminEditTitle">Kelola Data Tim</h3>
+            <span class="modal-close" onclick="tutupAdminEdit()">✕</span>
+          </div>
+          <div id="adminEditBody" class="modal-body"><div class="loading-state">Memuat data tim...</div></div>
+        </div>
+      </div>
+
+      <!-- ================= MODAL SET PEMENANG ================= -->
+      <div id="editStatusModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+          <h3>🕓 Ubah Status Race</h3>
+          <p class="modal-sub" id="editStatusInfo"></p>
+          <label>Status Tim</label>
+          <select id="editStatusSelect">
+            <option value="Menunggu Jadwal">🗓️ Menunggu Jadwal</option>
+            <option value="Persiapan Race Berikutnya">🕓 Persiapan Race Berikutnya</option>
+            <option value="Sedang Bertanding">🚣 Sedang Bertanding</option>
+          </select>
+          <div id="editStatusMsg" class="msg" style="display:none;"></div>
+          <div class="modal-actions">
+            <button class="btn-secondary" onclick="tutupEditStatusModal()">Batal</button>
+            <button class="btn-primary" onclick="simpanEditStatus()">💾 Simpan</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="setPemenangModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+          <h3>🏆 Tetapkan Pemenang</h3>
+          <p class="modal-sub">Pilih tim yang menang pada pertandingan ini.</p>
+          <div id="setPemenangPilihan" style="display:flex; flex-direction:column; gap:10px; margin-top:6px;"></div>
+          <div id="setPemenangMsg" class="msg" style="display:none;"></div>
+          <div class="modal-actions">
+            <button class="btn-secondary" onclick="tutupSetPemenang()">Batal</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= MODAL KONFIRMASI UMUM ================= -->
+      <div id="confirmModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+          <h3>⚠️ Konfirmasi</h3>
+          <p class="modal-sub" id="confirmModalText"></p>
+          <div class="modal-actions">
+            <button class="btn-secondary" onclick="tutupConfirmModal()">Batal</button>
+            <button class="btn-primary" id="confirmModalYesBtn" style="background:var(--red);">Ya, Lanjutkan</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="peraturanModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box modal-box-lg">
+          <div class="modal-head">
+            <h3>📜 Peraturan Lomba Dayung</h3>
+            <span class="modal-close" onclick="tutupPeraturanModal()">✕</span>
+          </div>
+          <div class="modal-body">
+            <ol style="margin:0; padding-left:20px; line-height:1.75; font-size:13.5px; color:var(--navy-900);">
+              <li>Peserta harus hadir ½ jam sebelum lomba dimulai.</li>
+              <li>Apabila peserta dipanggil selama 3 kali tapi tidak ada konfirmasi, maka dianggap gugur.</li>
+              <li>Lomba diadakan sistem gugur, dan setiap pertandingan terdiri dari 2 tim.</li>
+              <li>Pemain wajib menggunakan peralatan panitia dalam pertandingan Perahu Tradisional, dan untuk Dragon Boat boleh membawa daun dayung masing-masing yang terbuat dari kayu.</li>
+              <li>Perahu dan lintasan diundi sebelum turun ke sungai.</li>
+              <li>Untuk Perahu Tradisional boleh mengganti pemain sebelum pertandingan awal. Bagi tim yang sudah menang penyisihan tidak boleh berganti pemain — apabila melakukan pergantian dan pengurangan pemain maka dinyatakan gugur.</li>
+              <li>Untuk Perahu Dragon Boat yang ingin melakukan pergantian pemain harus dengan cadangan yang didaftarkan.</li>
+              <li>Tim yang memenangkan pertandingan di babak penyisihan wajib berfoto bersama.</li>
+              <li>Peserta yang mencuri start lebih dari 2x maka dinyatakan gugur dalam pertandingan.</li>
+              <li>Peserta yang tertinggal jauh dan salah satu tim sudah masuk finis, maka peserta tersebut akan dijemput.</li>
+              <li>Peserta dilarang terjun bebas dari perahu.</li>
+              <li>Bagi peserta yang tidak bisa berenang wajib lapor panitia.</li>
+              <li>Peserta yang mengambil lintasan lawannya dan dinyatakan wasit salah, maka akan digugurkan di pertandingan.</li>
+              <li>Aba-aba start adalah <strong>"READY GOO!!!"</strong></li>
+              <li>Peserta diharapkan menggunakan pakaian seragam.</li>
+              <li>Protes keputusan wasit dikenakan biaya <strong>Rp 2.000.000,-</strong></li>
+            </ol>
+          </div>
+          <div class="modal-actions" style="padding:0 24px 20px 24px;">
+            <button class="btn-primary" style="width:100%;" onclick="tutupPeraturanModal()">✅ Saya Mengerti</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= HALAMAN BERANDA ================= -->
+      <div id="viewBeranda">
+        <div class="beranda-atas-grid">
+          <div class="hero hero-banner">
+            <img src="assets/banner.jpg" alt="Lomba Balap Perahu Naga dan Perahu Tradisional HUT RI ke-81" class="hero-banner-img">
+            <div class="running-text-wrap">
+              <div class="running-text-track">
+                <span class="running-text-item">🚣 Lomba Balap Perahu Naga &amp; Tradisional Dalam Rangka HUT Kemerdekaan RI Ke-81 ---- Kab. Hulu Sungai Utara</span>
+                <span class="running-text-item">🚣 Lomba Balap Perahu Naga &amp; Tradisional Dalam Rangka HUT Kemerdekaan RI Ke-81 ---- Kab. Hulu Sungai Utara</span>
+              </div>
+            </div>
+            <div class="hero-wave">
+              <svg viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0,32 C240,60 480,0 720,18 C960,36 1200,58 1440,26 L1440,60 L0,60 Z" fill="#f2f6fb"></path>
+              </svg>
+            </div>
+          </div>
+
+          <div class="beranda-stream-panel" id="berandaStreamPanel">
+            <div class="stream-panel-inner">
+              <div class="stream-live-badge">🔴 LIVE STREAMING</div>
+              <div class="stream-video-wrap">
+                <iframe id="berandaStreamIframe" src="" title="Live Streaming" frameborder="0" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" loading="lazy"></iframe>
+                <div class="stream-caption-mask" aria-hidden="true"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="beranda-live-panel">
+            <div class="section-title" style="margin-top:0;">🔴 Sedang Berlangsung</div>
+            <div id="berandaLiveRace" class="tim-list reveal-on-scroll"><div class="loading-state">Memuat race terkini...</div></div>
+
+            <div class="section-title">⏭️ Race Berikutnya</div>
+            <div id="berandaRaceBerikutnya" class="tim-list reveal-on-scroll"><div class="loading-state">Memuat race berikutnya...</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= HALAMAN DETAIL KATEGORI (Jadwal + Skema) ================= -->
+      <div id="viewKategoriDetail" class="daftar-page" style="display:none;">
+        <div class="container">
+          <span class="back-link" onclick="tampilkanBeranda()">← Kembali ke Beranda</span>
+          <div class="kategori-detail-head">
+            <span class="kdh-icon" id="kdhIcon">🐉</span>
+            <h2 id="kdhJudul">Perahu Naga</h2>
+          </div>
+          <div class="kategori-tab-row">
+            <button class="kategori-tab active" id="tabJadwalBtn" onclick="gantiTabKategori('jadwal')">🗓️ Jadwal Pertandingan</button>
+            <button class="kategori-tab" id="tabSkemaBtn" onclick="gantiTabKategori('skema')">🏆 Skema Pertandingan</button>
+          </div>
+          <div id="kdContentJadwal">
+            <button class="btn-secondary" style="margin-bottom:16px;" onclick="downloadJadwalPdf()">📥 Download Jadwal (PDF)</button>
+            <div id="kdJadwalIsi"><div class="loading-state">Memuat jadwal...</div></div>
+          </div>
+          <div id="kdContentSkema" style="display:none;">
+            <button class="btn-secondary" style="margin-bottom:16px;" onclick="downloadSkemaPdf()">📥 Download Skema (PDF)</button>
+            <div id="kdSkemaContainer"><div class="loading-state">Memuat skema...</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= HALAMAN DAFTAR PESERTA ================= -->
+      <div id="viewDaftar" class="daftar-page" style="display:none;">
+        <div class="container">
+          <span class="back-link" onclick="tampilkanBeranda()">← Kembali ke Beranda</span>
+          <div class="daftar-toolbar">
+            <h2>📋 Tim Terdaftar</h2>
+            <select id="filterKategoriDaftar" class="filter-select" onchange="renderDaftarTim()">
+              <option value="">Semua Kategori</option>
+              <option value="Perahu Naga">Perahu Naga</option>
+              <option value="Perahu Tradisional">Perahu Tradisional</option>
+            </select>
+          </div>
+          <div id="daftarTimContainer" class="tim-list"><div class="loading-state">Memuat data tim terdaftar...</div></div>
+        </div>
+      </div>
+
+      <!-- ================= HALAMAN JADWAL PERTANDINGAN (GLOBAL, SEMUA KATEGORI) ================= -->
+      <div id="viewJadwalGlobal" class="daftar-page" style="display:none;">
+        <div class="container">
+          <span class="back-link" onclick="tampilkanBeranda()">← Kembali ke Beranda</span>
+          <div class="daftar-toolbar">
+            <h2>🗓️ Jadwal Pertandingan</h2>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <select id="filterKategoriJadwalGlobal" class="filter-select" onchange="renderJadwalGlobal()">
+                <option value="">Semua Kategori</option>
+                <option value="Perahu Naga">Perahu Naga</option>
+                <option value="Perahu Tradisional|Umum Putra">Tradisional — Umum Putra</option>
+                <option value="Perahu Tradisional|Umum Putri">Tradisional — Umum Putri</option>
+                <option value="Perahu Tradisional|ASN">Tradisional — ASN</option>
+              </select>
+              <select id="filterBabakJadwalGlobal" class="filter-select" onchange="renderJadwalGlobal()">
+                <option value="">Semua Babak</option>
+                <option value="Babak-1">Babak-1</option>
+                <option value="Babak-2">Babak-2</option>
+                <option value="Babak-3">Babak-3</option>
+                <option value="Babak-4">Babak-4</option>
+                <option value="Babak-5">Babak-5</option>
+                <option value="Semifinal">Semifinal</option>
+                <option value="Final">Final</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-secondary" style="margin-bottom:16px;" onclick="downloadJadwalGlobalPdf()">📥 Download Jadwal (PDF)</button>
+          <div id="jadwalGlobalIsi" class="tim-list"><div class="loading-state">Memuat jadwal pertandingan...</div></div>
+        </div>
+      </div>
+
+      <!-- ================= HALAMAN PILIH KATEGORI UNTUK SKEMA ================= -->
+      <div id="viewSkemaPilihKategori" class="daftar-page" style="display:none;">
+        <div class="container">
+          <span class="back-link" onclick="tampilkanBeranda()">← Kembali ke Beranda</span>
+          <h2 style="margin-bottom:18px;">🏆 Skema Pertandingan — Pilih Kategori</h2>
+          <div class="kategori-board-grid">
+            <div class="kategori-board" onclick="tampilkanKategoriDetail('Perahu Naga','','skema')">
+              <div class="kb-icon-wrap"><div class="kb-icon">🐉</div></div>
+              <div class="kb-title">Perahu Naga</div>
+              <div class="kb-sub">12 orang/tim</div>
+            </div>
+            <div class="kategori-board" onclick="tampilkanKategoriDetail('Perahu Tradisional','Umum Putra','skema')">
+              <div class="kb-icon-wrap"><div class="kb-icon">🚹</div></div>
+              <div class="kb-title">Tradisional Putra</div>
+              <div class="kb-sub">4 pendayung/tim</div>
+            </div>
+            <div class="kategori-board" onclick="tampilkanKategoriDetail('Perahu Tradisional','Umum Putri','skema')">
+              <div class="kb-icon-wrap"><div class="kb-icon">🚺</div></div>
+              <div class="kb-title">Tradisional Putri</div>
+              <div class="kb-sub">4 pendayung/tim</div>
+            </div>
+            <div class="kategori-board" onclick="tampilkanKategoriDetail('Perahu Tradisional','ASN','skema')">
+              <div class="kb-icon-wrap"><div class="kb-icon">🏛️</div></div>
+              <div class="kb-title">Tradisional ASN</div>
+              <div class="kb-sub">4 pendayung/tim</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= HALAMAN PANEL ADMIN — KELOLA TIM ================= -->
+      <div id="viewAdmin" class="daftar-page" style="display:none;">
+        <div class="container">
+          <span class="back-link" onclick="tampilkanBeranda()">← Kembali ke Beranda</span>
+          <div class="daftar-toolbar">
+            <h2>🔐 Panel Admin — Kelola Data Tim</h2>
+            <button class="btn-secondary" onclick="logoutAdmin()">Keluar Admin</button>
+          </div>
+          <div class="admin-switch-row">
+            <button class="btn-secondary" disabled>👥 Kelola Tim</button>
+            <button class="btn-secondary" onclick="tampilkanAdminJadwal()">🗓️ Kelola Jadwal Pertandingan</button>
+            <button class="btn-secondary" onclick="tampilkanAdminUndian()">🎰 Acak Tim Bertanding</button>
+            <button class="btn-secondary" onclick="tampilkanAdminStream()">🔴 Live Streaming</button>
+          </div>
+          <p style="font-size:12.5px;color:var(--text-muted);margin:10px 0 18px 0;">Klik <strong>Kelola</strong> untuk melengkapi/memperbaiki data tim, atau <strong>Cetak</strong> untuk mencetak data tim.</p>
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px;">
+            <button class="btn-secondary" id="btnDownloadSemuaDataTim" onclick="downloadSemuaDataTim(this)">📥 Download Semua Data Tim</button>
+            <button class="btn-secondary" id="btnDownloadSemuaKupon" onclick="downloadSemuaKuponRace(this)">📥 Download Semua Kupon Race</button>
+          </div>
+          <div id="adminTimList" class="tim-list"><div class="loading-state">Memuat data tim...</div></div>
+        </div>
+      </div>
+
+      <!-- ================= HALAMAN PANEL ADMIN — KELOLA JADWAL ================= -->
+      <div id="viewAdminJadwal" class="daftar-page" style="display:none;">
+        <div class="container">
+          <span class="back-link" onclick="tampilkanBeranda()">← Kembali ke Beranda</span>
+          <div class="daftar-toolbar">
+            <h2>🔐 Panel Admin — Kelola Jadwal</h2>
+            <button class="btn-secondary" onclick="logoutAdmin()">Keluar Admin</button>
+          </div>
+          <div class="admin-switch-row">
+            <button class="btn-secondary" onclick="tampilkanAdmin()">👥 Kelola Tim</button>
+            <button class="btn-secondary" disabled>🗓️ Kelola Jadwal Pertandingan</button>
+            <button class="btn-secondary" onclick="tampilkanAdminUndian()">🎰 Acak Tim Bertanding</button>
+            <button class="btn-secondary" onclick="tampilkanAdminStream()">🔴 Live Streaming</button>
+          </div>
+
+          <div class="admin-jadwal-form" style="margin-top:14px;">
+            <div class="admin-section-title" style="margin-top:0;padding-top:0;border-top:none;">📡 Babak yang Ditayangkan ke Publik</div>
+            <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 12px 0;">
+              Pilih SATU babak yang ditampilkan di halaman Beranda &amp; Jadwal Pertandingan publik. Ini mencegah Nomor Race dari babak berbeda tertukar/tertimpa terlihat bersamaan, karena tiap babak memang sama-sama mulai dari Race-1.
+            </p>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <select id="pilihBabakTayang" class="filter-select" style="flex:1; min-width:200px;">
+                <option value="">Semua Babak (default)</option>
+                <option value="Babak-1">Babak-1</option>
+                <option value="Babak-2">Babak-2</option>
+                <option value="Babak-3">Babak-3</option>
+                <option value="Babak-4">Babak-4</option>
+                <option value="Babak-5">Babak-5</option>
+                <option value="Semifinal">Semifinal</option>
+                <option value="Final">Final</option>
+              </select>
+              <button class="btn-primary" onclick="simpanBabakTayang()">📡 Tayangkan</button>
+            </div>
+            <div id="babakTayangMsg" class="msg" style="display:none;"></div>
+          </div>
+
+          <div class="admin-section-title">Daftar Pertandingan</div>
+          <select id="filterKategoriAdminJadwal" class="filter-select" onchange="muatDaftarJadwalAdmin()" style="margin-bottom:14px;">
+            <option value="">Semua Kategori</option>
+            <option value="Perahu Naga">Perahu Naga</option>
+            <option value="Perahu Tradisional|Umum Putra">Tradisional — Umum Putra</option>
+            <option value="Perahu Tradisional|Umum Putri">Tradisional — Umum Putri</option>
+            <option value="Perahu Tradisional|ASN">Tradisional — ASN</option>
+          </select>
+          <div id="adminJadwalList" class="tim-list"><div class="loading-state">Memuat data jadwal...</div></div>
+
+          <div class="admin-jadwal-form" style="margin-top:26px;">
+            <div class="admin-section-title">Tambah / Edit Pertandingan</div>
+            <input type="hidden" id="jadwalEditNo" value="">
+            <label>Kategori</label>
+            <select id="jadwalKategori" onchange="toggleJadwalKelas(); muatOpsiTimJadwal();">
+              <option value="" disabled selected>-- Pilih Kategori --</option>
+              <option value="Perahu Naga">Perahu Naga</option>
+              <option value="Perahu Tradisional">Perahu Tradisional</option>
+            </select>
+            <div id="wrapJadwalKelas" style="display:none;">
+              <label>Kelas</label>
+              <select id="jadwalKelas" onchange="muatOpsiTimJadwal()">
+                <option value="" disabled selected>-- Pilih Kelas --</option>
+                <option value="Umum Putra">Umum Putra</option>
+                <option value="Umum Putri">Umum Putri</option>
+                <option value="ASN">ASN</option>
+              </select>
+            </div>
+            <label>Babak</label>
+            <input type="text" id="jadwalBabak" list="daftarBabakSaran" placeholder="Contoh: Babak-1, Babak-2, Semifinal, Final">
+            <datalist id="daftarBabakSaran">
+              <option value="Babak-1">
+              <option value="Babak-2">
+              <option value="Babak-3">
+              <option value="Babak-4">
+              <option value="Babak-5">
+              <option value="Semifinal">
+              <option value="Final">
+            </datalist>
+            <label>Nomor Heat (opsional)</label>
+            <input type="text" id="jadwalNomorHeat" placeholder="Contoh: Heat 1">
+            <label>Pool (opsional — untuk sistem grup, selain Heat)</label>
+            <select id="jadwalPool">
+              <option value="">-- Tanpa Pool (sistem Heat biasa) --</option>
+              <option value="Pool A">Pool A</option>
+              <option value="Pool B">Pool B</option>
+            </select>
+            <label>Line 1</label>
+            <select id="jadwalTimA"><option value="">-- Pilih Line 1 --</option></select>
+            <label>Line 2 (kosongkan/pilih BYE jika tidak ada lawan)</label>
+            <select id="jadwalTimB"><option value="">BYE (tanpa lawan)</option></select>
+            <label>Informasi untuk Tim</label>
+            <select id="jadwalWaktu">
+              <option value="Menunggu Jadwal">🗓️ Menunggu Jadwal</option>
+              <option value="Persiapan Race Berikutnya">🕓 Persiapan Race Berikutnya</option>
+              <option value="Sedang Bertanding">🚣 Sedang Bertanding</option>
+              <option value="Sudah Selesai">✅ Sudah Selesai</option>
+            </select>
+            <label>Lintasan / Catatan (opsional)</label>
+            <input type="text" id="jadwalCatatan" placeholder="Contoh: Lintasan 1">
+            <div style="display:flex; gap:10px; margin-top:14px;">
+              <button class="btn-primary" onclick="simpanJadwal()">💾 Simpan Jadwal</button>
+              <button class="btn-secondary" onclick="resetFormJadwal()">Batal / Formulir Baru</button>
+            </div>
+            <div id="jadwalFormMsg" class="msg" style="display:none;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= HALAMAN PANEL ADMIN — ACAK TIM BERTANDING ================= -->
+      <div id="viewAdminUndian" class="daftar-page" style="display:none;">
+        <div class="container">
+          <span class="back-link" onclick="tampilkanBeranda()">← Kembali ke Beranda</span>
+          <div class="daftar-toolbar">
+            <h2>🔐 Panel Admin — Acak Tim Bertanding</h2>
+            <button class="btn-secondary" onclick="logoutAdmin()">Keluar Admin</button>
+          </div>
+          <div class="admin-switch-row">
+            <button class="btn-secondary" onclick="tampilkanAdmin()">👥 Kelola Tim</button>
+            <button class="btn-secondary" onclick="tampilkanAdminJadwal()">🗓️ Kelola Jadwal Pertandingan</button>
+            <button class="btn-secondary" disabled>🎰 Acak Tim Bertanding</button>
+            <button class="btn-secondary" onclick="tampilkanAdminStream()">🔴 Live Streaming</button>
+          </div>
+
+          <div id="undianSetup" class="admin-jadwal-form">
+            <div class="admin-section-title">Pilih Kategori untuk Diundi</div>
+            <label>Kategori</label>
+            <select id="undianKategori" onchange="toggleUndianKelas()">
+              <option value="" disabled selected>-- Pilih Kategori --</option>
+              <option value="Perahu Naga">Perahu Naga</option>
+              <option value="Perahu Tradisional">Perahu Tradisional</option>
+            </select>
+            <div id="wrapUndianKelas" style="display:none;">
+              <label>Kelas</label>
+              <select id="undianKelas">
+                <option value="" disabled selected>-- Pilih Kelas --</option>
+                <option value="Umum Putra">Umum Putra</option>
+                <option value="Umum Putri">Umum Putri</option>
+                <option value="ASN">ASN</option>
+              </select>
+            </div>
+            <label>Jumlah Pertandingan Awal Pool A (opsional — kosongkan untuk otomatis)</label>
+            <input type="number" id="undianSlotA" min="1" placeholder="Contoh: 6">
+            <label>Jumlah Pertandingan Awal Pool B (opsional — kosongkan untuk otomatis)</label>
+            <input type="number" id="undianSlotB" min="1" placeholder="Contoh: 4">
+            <label>Babak (opsional — kosongkan untuk Babak-1 otomatis)</label>
+            <input type="text" id="undianBabakPilihan" list="daftarBabakSaranUndian" placeholder="Contoh: Babak-2, Semifinal, Final">
+            <datalist id="daftarBabakSaranUndian">
+              <option value="Babak-1">
+              <option value="Babak-2">
+              <option value="Babak-3">
+              <option value="Babak-4">
+              <option value="Babak-5">
+              <option value="Semifinal">
+              <option value="Final">
+            </datalist>
+            <p style="font-size:12px;color:var(--text-muted);margin:2px 0 0 0;">Untuk Babak-2 dan seterusnya, undian ini mengambil dari SEMUA tim terdaftar di kategori ini (bukan hanya sisa pemenang), dan nomor Race babak tsb akan mengikuti urutan campuran alami antar kategori (tidak memakai pola urutan tetap seperti Babak-1).</p>
+            <button class="btn-primary" style="width:100%;margin-top:14px;" onclick="mulaiUndian()">🎰 Mulai Undian</button>
+            <div id="undianSetupMsg" class="msg" style="display:none;"></div>
+          </div>
+
+          <div id="undianRoda" style="display:none;">
+            <div class="undian-layout">
+              <div class="undian-roda-col admin-jadwal-form" style="text-align:center;">
+                <div class="admin-section-title" style="text-align:center;" id="undianJudulKategori">Undian</div>
+                <div id="undianCatatanKhusus" class="msg" style="display:none;"></div>
+                <div class="roulette-wrap">
+                  <div class="roulette-pointer">▼</div>
+                  <canvas id="rouletteCanvas" width="300" height="300"></canvas>
+                </div>
+                <button class="btn-primary" id="rouletteSpinBtn" style="margin-top:16px;" onclick="putarRoda()">🎡 Putar Roda!</button>
+                <button class="btn-secondary" style="margin-top:16px;margin-left:8px;" onclick="ulangiUndian()">🔄 Ulangi Undian</button>
+                <div id="undianHasilSpin" class="roulette-hasil" style="display:none;"></div>
+              </div>
+              <div class="undian-hasil-col">
+                <div class="admin-section-title" id="judulPasanganUndian">Pasangan Hasil Undian</div>
+                <div id="daftarPasanganContainer" class="tim-list"><div class="empty-state">Mulai putar roda untuk membentuk pasangan pertandingan.</div></div>
+                <div id="undianSelesaiMsg" style="display:none; margin-top:16px;">
+                  <button class="btn-primary" style="width:100%;" id="btnSimpanUndian" onclick="simpanHasilUndian()">💾 Simpan Semua ke Jadwal</button>
+                  <div id="undianSimpanMsg" class="msg" style="display:none;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= HALAMAN PANEL ADMIN — LIVE STREAMING ================= -->
+      <div id="viewAdminStream" class="daftar-page" style="display:none;">
+        <div class="container">
+          <span class="back-link" onclick="tampilkanBeranda()">← Kembali ke Beranda</span>
+          <div class="daftar-toolbar">
+            <h2>🔐 Panel Admin — Live Streaming</h2>
+            <button class="btn-secondary" onclick="logoutAdmin()">Keluar Admin</button>
+          </div>
+          <div class="admin-switch-row">
+            <button class="btn-secondary" onclick="tampilkanAdmin()">👥 Kelola Tim</button>
+            <button class="btn-secondary" onclick="tampilkanAdminJadwal()">🗓️ Kelola Jadwal Pertandingan</button>
+            <button class="btn-secondary" onclick="tampilkanAdminUndian()">🎰 Acak Tim Bertanding</button>
+            <button class="btn-secondary" disabled>🔴 Live Streaming</button>
+          </div>
+
+          <div class="admin-jadwal-form" style="margin-top:14px;">
+            <div class="admin-section-title" style="margin-top:0;padding-top:0;border-top:none;">🔴 Live Streaming ke Publik</div>
+            <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 16px 0;">
+              Atur video live streaming yang tampil di halaman Beranda publik dari sini. Kotak video di halaman publik <strong>tidak punya tombol apapun</strong> (tanpa Play/Pause, Sound, Setting) — semua diatur dari sini, dan pengunjung otomatis melihat sesuai pengaturan ini.
+            </p>
+            <label>Link Live Streaming</label>
+            <input type="text" id="liveStreamLink" placeholder="Contoh: https://www.youtube.com/watch?v=xxxxxxxxxxx">
+
+            <label class="live-stream-toggle-row">
+              <input type="checkbox" id="liveStreamTayang">
+              <span>📡 Tayangkan kotak video ini di halaman Beranda</span>
+            </label>
+            <label class="live-stream-toggle-row">
+              <input type="checkbox" id="liveStreamPlay" checked>
+              <span>▶️ Putar video (matikan centang ini untuk jeda/pause)</span>
+            </label>
+            <label class="live-stream-toggle-row">
+              <input type="checkbox" id="liveStreamMute" checked>
+              <span>🔇 Bisukan suara (hilangkan centang untuk menyalakan suara)</span>
+            </label>
+            <p id="liveStreamSoundNote" style="font-size:12px;color:var(--warn);background:var(--warn-bg);border-radius:8px;padding:10px 12px;margin:4px 0 0 0;">
+              ⚠️ Catatan browser: kebanyakan browser HANYA mengizinkan video otomatis diputar dengan suara kalau pengunjung sudah pernah berinteraksi dengan halaman tersebut (klik/scroll). Kalau suara dinyalakan tapi pengunjung belum berinteraksi sama sekali, browser bisa menahan videonya sampai ada interaksi — ini batasan bawaan browser, bukan bug aplikasi.
+            </p>
+            <button class="btn-primary" style="margin-top:14px;" onclick="simpanLiveStream()">💾 Simpan Pengaturan Live Streaming</button>
+            <div id="liveStreamMsg" class="msg" style="display:none;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= HALAMAN FORM PENDAFTARAN ================= -->
+      <div id="viewForm" class="daftar-page" style="display:none;">
+        <div class="container" style="max-width:640px;">
+          <div class="form-card">
+            <span class="back-link" onclick="tampilkanBeranda()">← Kembali ke Beranda</span>
+            <h2>Formulir Pendaftaran</h2>
+            <p class="subtitle">Lengkapi seluruh data di bawah ini dengan benar</p>
+
+            <div id="formTutupNotice" style="display:none; text-align:center; padding:30px 10px;">
+              <div style="font-size:38px;">🔒</div>
+              <h3 style="color:var(--navy-900); margin:10px 0 6px 0;">Pendaftaran Telah Ditutup</h3>
+              <p style="color:var(--text-muted); font-size:13.5px;">Terima kasih atas antusiasnya! Silakan lihat jadwal &amp; skema pertandingan untuk tim yang sudah terdaftar.</p>
+              <button class="btn-primary" style="margin-top:16px;" onclick="tampilkanBeranda()">🏠 Kembali ke Beranda</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
   </div>
 
-  <iframe id="appFrame" title="Lomba Dayung HSU" src=""></iframe>
+  <!-- printArea HARUS di luar .app-layout - kalau di dalam, saat dicetak
+       elemen induknya ikut disembunyikan sehingga hasil cetak jadi kosong -->
+  <div id="printArea"></div>
 
-<script>
-  // Ganti URL di bawah jika deployment Apps Script berubah
-  var APPSCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlwKiEili9xmlc-DgaGhTmP7qu0Q0utnd3r4wCeV5I6aAttLUc-8bILQd1IuTO2CSdBQ/exec";
-
-  var frame = document.getElementById("appFrame");
-  var loading = document.getElementById("loading");
-  document.getElementById("manualLink").href = APPSCRIPT_URL;
-
-  frame.addEventListener("load", function () {
-    loading.classList.add("hide");
-  });
-
-  frame.src = APPSCRIPT_URL;
-
-  // Jika terlalu lama (misal iframe diblokir), tampilkan opsi buka manual
-  setTimeout(function () {
-    document.getElementById("fallback").style.display = "block";
-  }, 5000);
-</script>
+  <script src="assets/gas-api.js"></script>
+  <script src="assets/js-core.js"></script>
+  <script src="assets/js-bracket.js"></script>
+  <script src="assets/js-admin.js"></script>
+  <script src="assets/js-undian.js"></script>
 </body>
 </html>
