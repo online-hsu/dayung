@@ -3,43 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Race Dayung - HSU</title>
+    <title>Aplikasi Google Apps Script</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: Arial, sans-serif;
-            background-color: #f4f7f6;
-        }
-        .container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            flex-grow: 1;
-        }
+        body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 text-white p-2 rounded-lg font-bold text-lg">GAS</div>
+                <h1 class="text-xl font-bold text-gray-900">Aplikasi Web</h1>
+            </div>
+            <div>
+                <span id="status-badge" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Online
+                </span>
+            </div>
+        </div>
+    </header>
 
-    <div class="container">
-        <!-- Memuat Google Apps Script secara penuh ke dalam halaman -->
-        <iframe src="https://script.google.com/macros/s/AKfycbwlwKiEili9xmlc-DgaGhTmP7qu0Q0utnd3r4wCeV5I6aAttLUc-8bILQd1IuTO2CSdBQ/exec" 
-                allow="camera; microphone; geolocation; clipboard-write" 
-                title="Aplikasi Google Apps Script">
-        </iframe>
-    </div>
+    <!-- Main Content / Iframe Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col">
+        <div class="bg-white shadow-xl rounded-2xl overflow-hidden flex-1 flex flex-col border border-gray-100 relative min-h-[600px]">
+            <!-- Loading Indicator -->
+            <div id="loader" class="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center space-y-4 transition-opacity duration-300">
+                <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-gray-600 font-medium text-sm">Memuat aplikasi dari Google Apps Script...</p>
+            </div>
 
+            <!-- Iframe to Google Apps Script Web App -->
+            <iframe 
+                id="gas-iframe"
+                src="https://script.google.com/macros/s/AKfycbwlwKiEili9xmlc-DgaGhTmP7qu0Q0utnd3r4wCeV5I6aAttLUc-8bILQd1IuTO2CSdBQ/exec" 
+                class="w-full flex-1 border-0"
+                allow="geolocation; microphone; camera"
+                onload="document.getElementById('loader').style.opacity = '0'; setTimeout(() => document.getElementById('loader').style.display = 'none', 300);"
+            ></iframe>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-4 text-center text-xs text-gray-500">
+        Ditenagai oleh Google Apps Script & GitHub Pages
+    </footer>
 </body>
 </html>
